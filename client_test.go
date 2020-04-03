@@ -5,7 +5,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/joshturge/goswyftw"
+	"github.com/joshturge/goswyftx"
 )
 
 var (
