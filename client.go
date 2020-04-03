@@ -1,4 +1,4 @@
-package swyftx
+package goswyftx
 
 import (
 	"bytes"
@@ -45,7 +45,7 @@ func NewClientWithContext(ctx context.Context, apiKey, token string) (*Client, e
 		},
 	}
 
-	client.userAgent = fmt.Sprintf("Manette/Alpha2 %s; Service", runtime.GOOS)
+	client.userAgent = fmt.Sprintf("goswyftx/Alpha2 %s; Service", runtime.GOOS)
 
 	if token == "" {
 		var err error

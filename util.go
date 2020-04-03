@@ -1,4 +1,4 @@
-package swyftx
+package goswyftx
 
 import (
 	"bytes"

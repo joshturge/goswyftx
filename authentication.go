@@ -1,4 +1,4 @@
-package swyftx
+package goswyftx
 
 type Scope struct {
 	Display     string `json:"display"`
