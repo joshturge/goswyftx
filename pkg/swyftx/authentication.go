@@ -39,7 +39,7 @@ func (as *AuthService) Refresh() (string, error) {
 			APIKey string `json:"apiKey"`
 		}
 	)
-	body.APIKey = as.client.apiKey
+	body.APIKey = as.client.APIKey
 
 	if err := as.client.Post("auth/refresh/", &body, &token); err != nil {
 		return "", err
@@ -82,11 +82,11 @@ func (as *AuthService) GetKeys() ([]*Key, error) {
 
 // RevokeKey will revoke an api key
 // Returns the status of that action
-func (as *AuthService) RevokeKey() (string, error) {
+func (as *AuthService) RevokeKey(apiKey string) (string, error) {
 	var status struct {
 		Status string `json:"status"`
 	}
-	if err := as.client.Post("user/apiKeys/revoke/", &as.client.apiKey, &status); err != nil {
+	if err := as.client.Post("user/apiKeys/revoke/", &apiKey, &status); err != nil {
 		return "", err
 	}
 
