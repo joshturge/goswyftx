@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"net/http"
 	"runtime"
+	"io/ioutil"
 )
 
 const (
@@ -64,7 +65,7 @@ func (c *Client) NewRequest(method, url string, body interface{}) (req *http.Req
 
 	req.Header.Add("Content-Type", "application/json")
 	if len(c.AccessToken) > 0 {
-		req.Header.Add("Authorization", buildString("Bearer ", c.AccessToken))
+		req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", c.AccessToken))
 	}
 	req.Header.Add("User-Agent", c.UserAgent)
 
@@ -79,25 +80,29 @@ func (c *Client) Do(req *http.Request, v interface{}) (resp *http.Response, err 
 		return nil, err
 	}
 
-	var body *bytes.Buffer
-	body, err = copyReadCloser(resp.Body)
+	var bodyBytes []byte
+	bodyBytes, err = ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return nil, fmt.Errorf("could not copy response body: %w", err)
 	}
+
+	bodyReader := bytes.NewReader(bodyBytes)
+
+	resp.Body = ioutil.NopCloser(bodyReader)
 
 	if resp.StatusCode >= http.StatusBadRequest {
 
 		var errResp struct {
 			Error Error `json:"error"`
 		}
-		if err = decodeJSON(body, &errResp); err != nil {
+		if err = json.NewDecoder(bodyReader).Decode(&errResp); err != nil {
 			return resp, fmt.Errorf("could not decode error: %w", err)
 		}
 
 		return resp, &errResp.Error
 	}
 
-	if err = decodeJSON(body, v); err != nil {
+	if err = json.NewDecoder(bodyReader).Decode(v); err != nil {
 		return resp, fmt.Errorf("could not decode response: %w", err)
 	}
 
@@ -107,7 +112,7 @@ func (c *Client) Do(req *http.Request, v interface{}) (resp *http.Response, err 
 // Request will send a request to swyftx and check the response for errors
 func (c *Client) Request(method, path string, body, v interface{}) error {
 
-	req, err := c.NewRequest(method, buildString(c.BaseURL, path), body)
+	req, err := c.NewRequest(method, fmt.Sprintf("%s%s", c.BaseURL, path), body)
 	if err != nil {
 		return fmt.Errorf("could not create request: %w", err)
 	}
