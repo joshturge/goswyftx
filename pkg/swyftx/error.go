@@ -1,4 +1,4 @@
-package goswyftx
+package swyftx
 
 import "errors"
 

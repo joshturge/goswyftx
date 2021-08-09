@@ -1,20 +1,20 @@
-package goswyftx_test
+package swyftx_test
 
 import (
 	"fmt"
 	"os"
 	"testing"
 
-	"github.com/joshturge/goswyftx"
+	"github.com/joshturge/goswyftx/pkg/swyftx"
 )
 
 var (
-	client *goswyftx.Client
+	client *swyftx.Client
 )
 
 func TestNewClient(t *testing.T) {
 	var err error
-	client, err = goswyftx.NewClient(os.Getenv("API_KEY"), os.Getenv("TOKEN"))
+	client, err = swyftx.NewClient(os.Getenv("API_KEY"), os.Getenv("TOKEN"))
 	if err != nil {
 		t.Error(err)
 		t.FailNow()
