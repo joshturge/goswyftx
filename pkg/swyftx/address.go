@@ -2,9 +2,7 @@ package swyftx
 
 import "strconv"
 
-type AddressDetails struct {
-}
-
+// Address contains information about asset address
 type Address struct {
 	ID      int    `json:"id,omitempty"`
 	Code    string `json:"code,omitempty"`
@@ -17,6 +15,7 @@ type Address struct {
 	Type string     `json:"type,omitempty"`
 }
 
+// BSBStatus contains information about a BSB verification status
 type BSBStatus struct {
 	// Duration in milliseconds
 	Duration          int    `json:"durationMs,omitempty"`
@@ -31,25 +30,21 @@ type BSBStatus struct {
 	State             string `json:"state,omitempty"`
 }
 
-// AddressService holds methods that can interact with Swyftx address endpoints
+// AddressService holds methods that can interact with swyftx API address endpoints
 type AddressService struct {
 	service
-	assetCode string
+	AssetCode string
 }
 
-// Address will create a new Address service that can interact with the Swyftx addresses endpoints
+// Address will create a new address service that can initeract with the swyftx addresses endpoints
 // The asset code is required for the Deposit, Withdraw and CheckDeposit endpoints
-func (c *Client) Address(assetCode ...string) *AddressService {
-	if len(assetCode) == 0 {
-		assetCode[0] = ""
-	}
-
-	return &AddressService{service{c}, assetCode[0]}
+func (c *Client) Address(assetCode string) *AddressService {
+	return &AddressService{service{c}, assetCode}
 }
 
 // Create will create a new address for a specific asset and return the newly created address
 func (as *AddressService) Create(name string) (*Address, error) {
-	if isEmptyStr(as.assetCode) {
+	if isEmptyStr(as.AssetCode) {
 		return nil, errAssetCode
 	}
 
@@ -63,30 +58,30 @@ func (as *AddressService) Create(name string) (*Address, error) {
 	)
 	body.Address.Name = name
 
-	if err := as.client.Post(buildString("address/deposit/", as.assetCode), &body, &addresses); err != nil {
+	if err := as.client.Post(buildString("address/deposit/", as.AssetCode), &body, &addresses); err != nil {
 		return nil, err
 	}
 
 	return addresses[0], nil
 }
 
-// GetActive will get all active addresses for an asset
-func (as *AddressService) GetActive() ([]*Address, error) {
+// Active will get all active addresses for an asset
+func (as *AddressService) Active() ([]*Address, error) {
 	return as.getAddresses("deposit")
 }
 
-// GetSaved will get all saved addresses for an asset
-func (as *AddressService) GetSaved() ([]*Address, error) {
+// Saved will get all saved addresses for an asset
+func (as *AddressService) Saved() ([]*Address, error) {
 	return as.getAddresses("withdraw")
 }
 
 func (as *AddressService) getAddresses(fiatType string) ([]*Address, error) {
-	if isEmptyStr(as.assetCode) {
+	if isEmptyStr(as.AssetCode) {
 		return nil, errAssetCode
 	}
 
 	var addresses []*Address
-	if err := as.client.Get(buildString("address/", fiatType, "/", as.assetCode), &addresses); err != nil {
+	if err := as.client.Get(buildString("address/", fiatType, "/", as.AssetCode), &addresses); err != nil {
 		return nil, err
 	}
 
@@ -111,7 +106,8 @@ func (as *AddressService) VerifyWithdrawal(token string) error {
 	return nil
 }
 
-// VerifyBSB will verify a BSB number and send back the current status of that BSB
+// VerifyBSB will verify a BSB number and send back the current status of that
+// BSB number
 func (as *AddressService) VerifyBSB(bsb string) (*BSBStatus, error) {
 	var bsbStatus BSBStatus
 	if err := as.client.Get(buildString("address/withdraw/bsb-verify/", bsb), &bsbStatus); err != nil {
@@ -123,11 +119,11 @@ func (as *AddressService) VerifyBSB(bsb string) (*BSBStatus, error) {
 
 // CheckDeposit check a deposit for an address given the address id
 func (as *AddressService) CheckDeposit(addressID int) error {
-	if isEmptyStr(as.assetCode) {
+	if isEmptyStr(as.AssetCode) {
 		return errAssetCode
 	}
 
-	if err := as.client.Get(buildString("address/check/", as.assetCode, "/", strconv.Itoa(addressID)),
+	if err := as.client.Get(buildString("address/check/", as.AssetCode, "/", strconv.Itoa(addressID)),
 		nil); err != nil {
 		return err
 	}

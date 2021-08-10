@@ -6,6 +6,7 @@ var (
 	errAssetCode = errors.New("asset code was not set")
 )
 
+// Error is an swyftx API error response
 type Error struct {
 	Summary string `json:"error"`
 	Message string `json:"message"`

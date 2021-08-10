@@ -5,8 +5,11 @@ import (
 	"time"
 )
 
+// ChartService contains methods that interact with the swyftx API chart
+// endpoints
 type ChartService service
 
+// GetBarChartRequest contains information for an asset bar chart request
 type GetBarChartRequest struct {
 	BaseAsset        string
 	SecondaryAsset   string
@@ -16,7 +19,8 @@ type GetBarChartRequest struct {
 	FirstDataRequest bool
 }
 
-type OCHLVT struct {
+// Candle contains information about a timeframe in a candlestick chart
+type Candle struct {
 	Time   SwyftxTime `json:"time,omitempty"`
 	Open   string     `json:"open,omitempty"`
 	High   string     `json:"high,omitempty"`
@@ -64,7 +68,7 @@ func (c *Client) Chart() *ChartService {
 }
 
 // Bar chart that contains pricing ticks for asset pair
-func (cs *ChartService) Bar(cRequest *GetBarChartRequest) ([]*OCHLVT, error) {
+func (cs *ChartService) Bar(cRequest *GetBarChartRequest) ([]*Candle, error) {
 	uri := buildString("charts/getBars/",
 		cRequest.BaseAsset, "/",
 		cRequest.SecondaryAsset, "/",
@@ -74,7 +78,7 @@ func (cs *ChartService) Bar(cRequest *GetBarChartRequest) ([]*OCHLVT, error) {
 		"&firstDataRequest=", strconv.FormatBool(cRequest.FirstDataRequest),
 	)
 
-	var barCharts []*OCHLVT
+	var barCharts []*Candle
 	if err := cs.client.Get(uri, &barCharts); err != nil {
 		return nil, err
 	}
@@ -83,10 +87,10 @@ func (cs *ChartService) Bar(cRequest *GetBarChartRequest) ([]*OCHLVT, error) {
 }
 
 // LatestBar will return the latest bar for an asset/s
-func (cs *ChartService) LatestBar(cAssets ...ChartAsset) ([]*OCHLVT, error) {
+func (cs *ChartService) LatestBar(cAssets ...ChartAsset) ([]*Candle, error) {
 	var (
 		body      []ChartAsset
-		barCharts []*OCHLVT
+		barCharts []*Candle
 	)
 	body = cAssets
 

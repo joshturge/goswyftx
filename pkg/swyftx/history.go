@@ -2,9 +2,11 @@ package swyftx
 
 import "strconv"
 
+// HistoryService contains methods which interact with the swyftx API history
+// endpoints
 type HistoryService struct {
 	service
-	assetId int
+	AssetId int
 }
 
 type CurrencyHistory struct {
@@ -28,19 +30,19 @@ func (c *Client) History(asset int) *HistoryService {
 	return &HistoryService{service{c}, asset}
 }
 
-// Withdraw events for an asset
+// Withdraw will get withdrawal history for an asset
 func (hs *HistoryService) Withdraw() (*CurrencyHistory, error) {
 	return hs.currency("withdraw")
 }
 
-// Deposit events for an asset
+// Deposit will get deposit history for an asset
 func (hs *HistoryService) Deposit() (*CurrencyHistory, error) {
 	return hs.currency("deposit")
 }
 
 func (hs *HistoryService) currency(actionType string) (*CurrencyHistory, error) {
 	var histCurrency CurrencyHistory
-	if err := hs.client.Get(buildString("history/", actionType, "/", strconv.Itoa(hs.assetId)),
+	if err := hs.client.Get(buildString("history/", actionType, "/", strconv.Itoa(hs.AssetId)),
 		&histCurrency); err != nil {
 		return nil, err
 	}
@@ -48,10 +50,10 @@ func (hs *HistoryService) currency(actionType string) (*CurrencyHistory, error) 
 	return &histCurrency, nil
 }
 
-// All trades, withdrawals and deposits events for an asset
+// All will get all transactio history for an asset
 func (hs *HistoryService) All(actionType string) ([]*TransactionHistory, error) {
 	var transHist []*TransactionHistory
-	if err := hs.client.Get(buildString("history/", actionType, "/", strconv.Itoa(hs.assetId)),
+	if err := hs.client.Get(buildString("history/", actionType, "/", strconv.Itoa(hs.AssetId)),
 		&transHist); err != nil {
 		return nil, err
 	}

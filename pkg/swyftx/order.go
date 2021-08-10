@@ -2,6 +2,8 @@ package swyftx
 
 import "strconv"
 
+// OrderService contains methods which can interact with order endpoints on the
+// swyftx API
 type OrderService service
 
 type OrderExchangeRate struct {
@@ -9,6 +11,7 @@ type OrderExchangeRate struct {
 	Price string `json:"price,omitempty"`
 }
 
+// OrderPlace contains information about a placed order
 type OrderPlace struct {
 	Primary       string  `json:"primary,omitempty"`
 	Secondary     string  `json:"secondary,omitempty"`
@@ -18,6 +21,7 @@ type OrderPlace struct {
 	Trigger       int     `json:"trigger,omitempty"`
 }
 
+// Order contains information about a swyftx order
 type Order struct {
 	Type           string     `json:"order_type,omitempty"`
 	PrimaryAsset   string     `json:"primary_asset,omitempty"`
@@ -33,7 +37,8 @@ type Order struct {
 	ID             int        `json:"id,omitempty"`
 }
 
-// Order will return a order service that can interact with swyftx api
+// Order will create a new order service that can interact with swyftx API order
+// enpoints
 func (c *Client) Order() *OrderService {
 	return (*OrderService)(&service{c})
 }

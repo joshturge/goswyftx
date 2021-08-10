@@ -2,8 +2,10 @@ package swyftx
 
 import "net/http"
 
+// AccountService wraps account specific swyftx API endpoints
 type AccountService service
 
+// AccountSettings contains swyftx account specific settings
 type AccountSettings struct {
 	// Used only for Account Profile request, might be a bug with the api?
 	FavouriteAssets struct {
@@ -19,6 +21,7 @@ type AccountSettings struct {
 	DisableSMSRecovery bool `json:"disableSMSRecovery,omitempty"`
 }
 
+// AccountProfile containts swyftx account information
 type AccountProfile struct {
 	DOB  SwyftxTime `json:"dob,omitempty"`
 	Name struct {
@@ -36,10 +39,12 @@ type AccountProfile struct {
 		MFAEnabled  bool `json:"mfa_enabled,omitempty"`
 		MFAEnrolled bool `json:"mfa_enrolled,omitempty"`
 	} `json:"metadata,omitempty"`
+	// NOTE: what's this???
 	UserSettings struct {
 	} `json:"userSettings,omitempty"`
 }
 
+// AccountVerification contains swyftx account verification information
 type AccountVerification struct {
 	Status   string `json:"status,omitempty"`
 	Email    string `json:"email,omitempty"`
@@ -48,6 +53,8 @@ type AccountVerification struct {
 	Identity string `json:"identity,omitempty"`
 }
 
+// AccountUserVerification contains a swyftx post verification status for either
+// phone or email types.
 type AccountUserVerification struct {
 	Success       bool   `json:"success,omitempty"`
 	EmailVerified bool   `json:"emailVerified,omitempty"`
@@ -55,17 +62,19 @@ type AccountUserVerification struct {
 	Msg           string `json:"msg,omitempty"`
 }
 
+// AccountAffiliation contains swyftx referral information
 type AccountAffiliation struct {
 	ReferralLink  string `json:"referral_link,omitempty"`
 	ReferredUsers int    `json:"referred_users"`
 }
 
+// AccountBalance contains the balance of an asset
 type AccountBalance struct {
 	AssetID int `json:"assetId,omitempty"`
-	// TODO: Convert to float
 	AvailableBalance string `json:"availableBalance,omitempty"`
 }
 
+// AccountStatistics contains statistics for a swyftx account
 type AccountStatistics struct {
 	Orders    int     `json:"orders,omitempty"`
 	Traded    float32 `json:"traded,omitempty"`
@@ -73,6 +82,7 @@ type AccountStatistics struct {
 	Withdrawn float32 `json:"withdrawn,omitempty"`
 }
 
+// AccountMilestones contains milestones for a swyftx account
 type AccountMilestones struct {
 	SignUp    bool `json:"signUp,omitempty"`
 	Verified  bool `json:"verified,omitempty"`
@@ -82,8 +92,8 @@ type AccountMilestones struct {
 	Completed bool `json:"completed,omitempty"`
 }
 
-// Account returns an account service that holds methods that can interact
-// with account endpoints
+// Account returns an account service that can interact with swyftx API account
+// endpoints
 func (c *Client) Account() *AccountService {
 	return (*AccountService)(&service{c})
 }
@@ -100,8 +110,8 @@ func (as *AccountService) Profile() (*AccountProfile, error) {
 	return &account.Profile, nil
 }
 
-// Settings will update a users account settings
-func (as *AccountService) Settings(accSett *AccountSettings) (*AccountProfile, error) {
+// UpdateSettings will update a users account settings
+func (as *AccountService) UpdateSettings(accSett *AccountSettings) (*AccountProfile, error) {
 	var (
 		account struct {
 			Profile AccountProfile `json:"profile"`
@@ -131,8 +141,8 @@ func (as *AccountService) VerificationInfo() (*AccountVerification, error) {
 	return &account.Verification, nil
 }
 
-// VerificationGreenID will save GreenID verification info
-func (as *AccountService) VerificationGreenID(greenID string) error {
+// SaveGreenID will save GreenID verification info
+func (as *AccountService) SaveGreenID(greenID string) error {
 	var body struct {
 		Verification struct {
 			ID string `json:"id"`
@@ -197,8 +207,8 @@ func (as *AccountService) Affiliation() (*AccountAffiliation, error) {
 	return &accAffil, nil
 }
 
-// Balance will get a user's account balance
-func (as *AccountService) Balance() ([]*AccountBalance, error) {
+// Balances will get a user's account balances
+func (as *AccountService) Balances() ([]*AccountBalance, error) {
 	var balances []*AccountBalance
 	if err := as.client.Get("user/balance/", &balances); err != nil {
 		return nil, err

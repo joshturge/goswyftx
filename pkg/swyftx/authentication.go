@@ -1,5 +1,6 @@
 package swyftx
 
+// Scope contains permission information for a particular API key action
 type Scope struct {
 	Display     string `json:"display"`
 	Description string `json:"desc"`
@@ -7,12 +8,14 @@ type Scope struct {
 	State       int    `json:"state"`
 }
 
+// AppScope contains information about an API keys scope
 type AppScope struct {
 	ReadAccount   Scope `json:"app.account.read"`
 	WithdrawFunds Scope `json:"app.funds.withdraw"`
 	DeleteOrders  Scope `json:"app.orders.delete"`
 }
 
+// Key contains information about an API key
 type Key struct {
 	ID      string     `json:"id"`
 	Label   string     `json:"label"`
@@ -29,8 +32,8 @@ func (c *Client) Authentication() *AuthService {
 	return (*AuthService)(&service{c})
 }
 
-// Refresh will regenerate a new access token (JWT token)
-func (as *AuthService) Refresh() (string, error) {
+// Refresh will regenerate a new access token (JWT token) given an api key
+func (as *AuthService) Refresh(apiKey string) (string, error) {
 	var (
 		token struct {
 			Token string `json:"accessToken"`
@@ -39,7 +42,7 @@ func (as *AuthService) Refresh() (string, error) {
 			APIKey string `json:"apiKey"`
 		}
 	)
-	body.APIKey = as.client.APIKey
+	body.APIKey = apiKey
 
 	if err := as.client.Post("auth/refresh/", &body, &token); err != nil {
 		return "", err
@@ -60,8 +63,8 @@ func (as *AuthService) Logout() (bool, error) {
 	return success.Success, nil
 }
 
-// GetScope will get the scope of permmissions for an api key
-func (as *AuthService) GetScope() (*AppScope, error) {
+// Scope will get the scope of permmissions for the current API key
+func (as *AuthService) Scope() (*AppScope, error) {
 	var appScope AppScope
 	if err := as.client.Get("user/apiKeys/scope/", &appScope); err != nil {
 		return nil, err
@@ -70,8 +73,8 @@ func (as *AuthService) GetScope() (*AppScope, error) {
 	return &appScope, nil
 }
 
-// GetKeys will get all the keys available to a user
-func (as *AuthService) GetKeys() ([]*Key, error) {
+// Keys will get all the keys available for the current swyftx account
+func (as *AuthService) Keys() ([]*Key, error) {
 	var keys []*Key
 	if err := as.client.Get("user/apiKeys/", &keys); err != nil {
 		return nil, err
@@ -80,7 +83,7 @@ func (as *AuthService) GetKeys() ([]*Key, error) {
 	return keys, nil
 }
 
-// RevokeKey will revoke an api key
+// RevokeKey will revoke an API key for the current swyftx account
 // Returns the status of that action
 func (as *AuthService) RevokeKey(apiKey string) (string, error) {
 	var status struct {
@@ -93,7 +96,7 @@ func (as *AuthService) RevokeKey(apiKey string) (string, error) {
 	return status.Status, nil
 }
 
-// RevokeAllKeys will revoke all api keys for a user account
+// RevokeAllKeys will revoke all API keys for the current swyftx account
 // Returns the status of that action
 func (as *AuthService) RevokeAllKeys() (string, error) {
 	var status struct {

@@ -2,6 +2,8 @@ package swyftx
 
 import "strconv"
 
+// FundsService contains a method which can interact with the swyftx API funds
+// endpoint
 type FundsService struct {
 	service
 	id int
